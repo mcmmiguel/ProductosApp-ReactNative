@@ -46,4 +46,13 @@ export const loginTheme = StyleSheet.create({
         alignItems: 'flex-end',
         marginTop: 10,
     },
+    returnButton: {
+        position: 'absolute',
+        top: 40,
+        borderWidth: 1,
+        borderColor: 'white',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 100,
+    },
 });
