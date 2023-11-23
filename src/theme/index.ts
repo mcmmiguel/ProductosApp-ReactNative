@@ -1,1 +1,1 @@
-export { LoginTheme } from './LoginTheme';
+export { loginTheme } from './loginTheme';
