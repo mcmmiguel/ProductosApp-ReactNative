@@ -40,8 +40,18 @@ export const AuthProvider = ({ children }: any) => {
         }
 
         // Hay token
+        const resp = await cafeAPI.get('/auth');
+        if (resp.status !== 200) {
+            return dispatch({ type: 'notAuthenticated' });
+        }
 
-
+        dispatch({
+            type: 'signUp',
+            payload: {
+                token: resp.data.token,
+                user: resp.data.usuario,
+            },
+        });
 
     };
 
