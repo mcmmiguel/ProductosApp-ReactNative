@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }: any) => {
 
     const signIn = async ({ correo, password }: LoginData) => {
         try {
-
             const { data } = await cafeAPI.post<LoginResponse>('/auth/login', {
                 correo,
                 password,
@@ -46,8 +45,12 @@ export const AuthProvider = ({ children }: any) => {
                 },
             });
 
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
+            dispatch({
+                type: 'addError',
+                payload: error.response.data.msg || 'Información incorrecta',
+            });
         }
     };
 
@@ -56,7 +59,9 @@ export const AuthProvider = ({ children }: any) => {
     };
 
     const removeError = () => {
-
+        dispatch({
+            type: 'removeError',
+        });
     };
 
 
