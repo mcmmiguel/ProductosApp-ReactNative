@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useReducer } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LoginData, LoginResponse, Usuario } from '../interfaces';
+import { LoginData, LoginResponse, RegisterData, Usuario } from '../interfaces';
 import { AuthState, authReducer } from './authReducer';
 import cafeAPI from '../api/cafeAPI';
 
@@ -9,8 +9,8 @@ type AuthContextProps = {
     token: string | null;
     user: Usuario | null;
     status: 'checking' | 'authenticated' | 'not-authenticated';
-    signUp: () => void;
-    signIn: ({ correo, password }: LoginData) => Promise<void>;
+    signUp: (registerData: RegisterData) => void
+    signIn: (loginData: LoginData) => Promise<void>;
     logOut: () => void;
     removeError: () => void;
 }
@@ -57,8 +57,30 @@ export const AuthProvider = ({ children }: any) => {
 
     };
 
-    const signUp = () => {
+    const signUp = async ({ correo, nombre, password }: RegisterData) => {
+        try {
+            const { data } = await cafeAPI.post<LoginResponse>('/usuarios', {
+                correo,
+                password,
+                nombre,
+            });
+            dispatch({
+                type: 'signUp',
+                payload: {
+                    token: data.token,
+                    user: data.usuario,
+                },
+            });
 
+            await AsyncStorage.setItem('token', data.token);
+
+        } catch (error: any) {
+            console.log(error);
+            dispatch({
+                type: 'addError',
+                payload: error.response.data.errors[0].msg || 'Por favor, revisa la información',
+            });
+        }
     };
 
     const signIn = async ({ correo, password }: LoginData) => {
