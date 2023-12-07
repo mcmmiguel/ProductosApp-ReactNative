@@ -1,4 +1,5 @@
-import React, { createContext, useReducer } from 'react';
+import React, { createContext, useEffect, useReducer } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LoginData, LoginResponse, Usuario } from '../interfaces';
 import { AuthState, authReducer } from './authReducer';
 import cafeAPI from '../api/cafeAPI';
@@ -27,6 +28,23 @@ export const AuthProvider = ({ children }: any) => {
 
     const [state, dispatch] = useReducer(authReducer, authInitialState);
 
+    useEffect(() => {
+        checkToken();
+    }, []);
+
+    const checkToken = async () => {
+        const token = await AsyncStorage.getItem('token');
+        // No token, no autenticado
+        if (!token) {
+            return dispatch({ type: 'notAuthenticated' });
+        }
+
+        // Hay token
+
+
+
+    };
+
     const signUp = () => {
 
     };
@@ -44,6 +62,8 @@ export const AuthProvider = ({ children }: any) => {
                     user: data.usuario,
                 },
             });
+
+            await AsyncStorage.setItem('token', data.token);
 
         } catch (error: any) {
             console.log(error);
