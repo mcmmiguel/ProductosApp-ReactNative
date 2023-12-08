@@ -1,5 +1,6 @@
-import React, { createContext, useState } from 'react';
-import { Producto } from '../interfaces';
+import React, { createContext, useEffect, useState } from 'react';
+import { Producto, ProductsResponse } from '../interfaces';
+import cafeAPI from '../api/cafeAPI';
 
 type ProductsContextProps = {
     products: Producto[];
@@ -17,8 +18,15 @@ export const ProductsProvider = ({ children }: any) => {
 
     const [products, setProducts] = useState<Producto[]>([]);
 
+    useEffect(() => {
+        loadProducts();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const loadProducts = async () => {
-        throw new Error('Not implemented');
+        const resp = await cafeAPI.get<ProductsResponse>('/productos?limite=50');
+        setProducts([...products, ...resp.data.productos]);
+        console.log(resp.data.productos);
     };
 
     const addProduct = async (categoryId: string, productName: string) => {
