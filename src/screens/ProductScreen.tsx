@@ -1,25 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Button, ActivityIndicator } from 'react-native';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useContext } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, Button, ActivityIndicator, Image } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { Picker } from '@react-native-picker/picker';
 import { ProductsStackParams } from '../navigation/ProductsNavigator';
-import { useCategories } from '../hooks';
+import { useCategories, useForm } from '../hooks';
+import { ProductsContext } from '../context';
 
 interface Props extends StackScreenProps<ProductsStackParams, 'ProductScreen'> { }
 
 export const ProductScreen = ({ route, navigation }: Props) => {
 
-    const { id, name = '' } = route.params;
-
-    const [selectedLanguage, setSelectedLanguage] = useState();
+    const { id = '', name = '' } = route.params;
+    const { loadProductById } = useContext(ProductsContext);
     const { categories, isLoading } = useCategories();
+    const { _id, categoriaId, nombre, img, form, onChange, setFormValue } = useForm({
+        _id: id,
+        categoriaId: '',
+        nombre: name,
+        img: '',
+    });
 
     useEffect(() => {
         navigation.setOptions({
             title: name ? name : 'New Product',
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        loadProduct();
+    }, []);
+
+    const loadProduct = async () => {
+        if (id.length === 0) { return; }
+
+        const product = await loadProductById(id);
+        setFormValue({
+            _id: id,
+            categoriaId: product.categoria._id,
+            img: product.img || '',
+            nombre,
+        });
+    };
 
     return (
         <View style={styles.mainContainer}>
@@ -28,7 +50,8 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                 <TextInput
                     style={styles.textInput}
                     placeholder="Product"
-
+                    value={nombre}
+                    onChangeText={(value) => onChange(value, 'nombre')}
                 />
 
                 {/* Picker / Selector */}
@@ -37,10 +60,9 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                     {(isLoading)
                         ? <ActivityIndicator style={styles.loader} color="#5856d6" size={35} />
                         : <Picker
-                            selectedValue={selectedLanguage}
-                            onValueChange={(itemValue) =>
-                                setSelectedLanguage(itemValue)
-                            }>
+                            selectedValue={categoriaId}
+                            onValueChange={(itemValue) => onChange(itemValue, 'categoriaId')}
+                        >
                             {
                                 categories.map((category) => (
                                     <Picker.Item key={category._id} label={category.nombre} value={category._id} />
@@ -70,6 +92,16 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                         color="#5856d6"
                     />
                 </View>
+
+                {
+                    (img.length > 0) &&
+                    <Image
+                        source={{ uri: img }}
+                        style={styles.image}
+                    />
+                }
+
+                {/* TODO Mostrar imagen temporal */}
             </ScrollView>
         </View>
     );
@@ -109,5 +141,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    image: {
+        marginTop: 20,
+        width: '100%',
+        height: 300,
+        resizeMode: 'contain',
     },
 });
