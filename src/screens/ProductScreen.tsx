@@ -12,7 +12,7 @@ interface Props extends StackScreenProps<ProductsStackParams, 'ProductScreen'> {
 export const ProductScreen = ({ route, navigation }: Props) => {
 
     const { id = '', name = '' } = route.params;
-    const { loadProductById } = useContext(ProductsContext);
+    const { loadProductById, updateProduct, addProduct } = useContext(ProductsContext);
     const { categories, isLoading } = useCategories();
     const { _id, categoriaId, nombre, img, form, onChange, setFormValue } = useForm({
         _id: id,
@@ -23,9 +23,9 @@ export const ProductScreen = ({ route, navigation }: Props) => {
 
     useEffect(() => {
         navigation.setOptions({
-            title: name ? name : 'New Product',
+            title: nombre ? nombre : 'No product name',
         });
-    }, []);
+    }, [nombre]);
 
     useEffect(() => {
         loadProduct();
@@ -43,13 +43,22 @@ export const ProductScreen = ({ route, navigation }: Props) => {
         });
     };
 
+    const saveOrUpdate = () => {
+        if (id.length > 0) {
+            updateProduct(categoriaId, nombre, id);
+        } else {
+            const tempCategoriaId = categoriaId || categories[0]._id;
+            addProduct(tempCategoriaId, nombre);
+        }
+    };
+
     return (
         <View style={styles.mainContainer}>
             <ScrollView>
                 <Text style={styles.label}>Product name</Text>
                 <TextInput
                     style={styles.textInput}
-                    placeholder="Product"
+                    placeholder="PESIPEPSI"
                     value={nombre}
                     onChangeText={(value) => onChange(value, 'nombre')}
                 />
@@ -73,25 +82,27 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                 </View>
                 <Button
                     title="Save"
-                    onPress={() => { }}
+                    onPress={saveOrUpdate}
                     color="#5856d6"
                 />
 
-                <View style={styles.buttonsContainer}>
-                    <Button
-                        title="Camera"
-                        onPress={() => { }}
-                        color="#5856d6"
-                    />
+                {id.length > 0 &&
+                    <View style={styles.buttonsContainer}>
+                        <Button
+                            title="Camera"
+                            onPress={() => { }}
+                            color="#5856d6"
+                        />
 
-                    <View style={styles.buttonsSeparator} />
+                        <View style={styles.buttonsSeparator} />
 
-                    <Button
-                        title="Gallery"
-                        onPress={() => { }}
-                        color="#5856d6"
-                    />
-                </View>
+                        <Button
+                            title="Gallery"
+                            onPress={() => { }}
+                            color="#5856d6"
+                        />
+                    </View>
+                }
 
                 {
                     (img.length > 0) &&
