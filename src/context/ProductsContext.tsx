@@ -20,13 +20,12 @@ export const ProductsProvider = ({ children }: any) => {
 
     useEffect(() => {
         loadProducts();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, []);
 
     const loadProducts = async () => {
         const resp = await cafeAPI.get<ProductsResponse>('/productos?limite=50');
-        setProducts([...products, ...resp.data.productos]);
-        console.log(resp.data.productos);
+        setProducts([...resp.data.productos]);
     };
 
     const addProduct = async (categoryId: string, productName: string): Promise<Producto> => {

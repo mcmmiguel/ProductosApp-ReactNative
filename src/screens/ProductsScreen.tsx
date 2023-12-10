@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React, { useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { ProductsContext } from '../context';
 import { StackScreenProps } from '@react-navigation/stack';
 import { ProductsStackParams } from '../navigation/ProductsNavigator';
@@ -9,7 +9,8 @@ interface Props extends StackScreenProps<ProductsStackParams, 'ProductsScreen'> 
 
 export const ProductsScreen = ({ navigation }: Props) => {
 
-    const { products } = useContext(ProductsContext);
+    const { products, loadProducts } = useContext(ProductsContext);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
         navigation.setOptions({
@@ -26,9 +27,25 @@ export const ProductsScreen = ({ navigation }: Props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const loadProductsFromBackend = async () => {
+        setIsRefreshing(true);
+        await loadProducts();
+        setIsRefreshing(false);
+    };
+
     return (
         <View style={styles.mainContainer}>
             <FlatList
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={loadProductsFromBackend}
+                        progressViewOffset={10} //Solo android
+                        colors={['#5856d6']}
+                        tintColor="white" // Solo iOS
+                        title="Refreshing" // Solo iOS
+                    />
+                }
                 data={products}
                 keyExtractor={(product) => product._id}
 
