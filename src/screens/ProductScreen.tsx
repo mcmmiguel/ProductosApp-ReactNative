@@ -14,7 +14,7 @@ export const ProductScreen = ({ route, navigation }: Props) => {
     const { id = '', name = '' } = route.params;
     const { loadProductById, updateProduct, addProduct } = useContext(ProductsContext);
     const { categories, isLoading } = useCategories();
-    const { _id, categoriaId, nombre, img, form, onChange, setFormValue } = useForm({
+    const { _id, categoriaId, nombre, img, onChange, setFormValue } = useForm({
         _id: id,
         categoriaId: '',
         nombre: name,
@@ -43,12 +43,13 @@ export const ProductScreen = ({ route, navigation }: Props) => {
         });
     };
 
-    const saveOrUpdate = () => {
+    const saveOrUpdate = async () => {
         if (id.length > 0) {
             updateProduct(categoriaId, nombre, id);
         } else {
             const tempCategoriaId = categoriaId || categories[0]._id;
-            addProduct(tempCategoriaId, nombre);
+            const newProduct = await addProduct(tempCategoriaId, nombre);
+            onChange(newProduct._id, '_id');
         }
     };
 
@@ -58,7 +59,7 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                 <Text style={styles.label}>Product name</Text>
                 <TextInput
                     style={styles.textInput}
-                    placeholder="PESIPEPSI"
+                    placeholder="Product"
                     value={nombre}
                     onChangeText={(value) => onChange(value, 'nombre')}
                 />
@@ -86,7 +87,7 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                     color="#5856d6"
                 />
 
-                {id.length > 0 &&
+                {_id.length > 0 &&
                     <View style={styles.buttonsContainer}>
                         <Button
                             title="Camera"
