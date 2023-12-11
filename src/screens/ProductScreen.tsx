@@ -13,7 +13,7 @@ interface Props extends StackScreenProps<ProductsStackParams, 'ProductScreen'> {
 export const ProductScreen = ({ route, navigation }: Props) => {
 
     const { id = '', name = '' } = route.params;
-    const { loadProductById, updateProduct, addProduct } = useContext(ProductsContext);
+    const { loadProductById, updateProduct, addProduct, uploadImage } = useContext(ProductsContext);
     const { categories, isLoading } = useCategories();
     const { _id, categoriaId, nombre, img, onChange, setFormValue } = useForm({
         _id: id,
@@ -63,6 +63,19 @@ export const ProductScreen = ({ route, navigation }: Props) => {
             if (resp.didCancel === true) { return; }
             if (!resp.assets) { return; }
             setTempUri(resp.assets[0].uri);
+            uploadImage(resp, _id);
+        });
+    };
+
+    const takePhotoFromGallery = () => {
+        launchImageLibrary({
+            mediaType: 'photo',
+            quality: 0.5,
+        }, (resp) => {
+            if (resp.didCancel === true) { return; }
+            if (!resp.assets) { return; }
+            setTempUri(resp.assets[0].uri);
+            uploadImage(resp, _id);
         });
     };
 
@@ -112,7 +125,7 @@ export const ProductScreen = ({ route, navigation }: Props) => {
 
                         <Button
                             title="Gallery"
-                            onPress={() => { }}
+                            onPress={takePhotoFromGallery}
                             color="#5856d6"
                         />
                     </View>
