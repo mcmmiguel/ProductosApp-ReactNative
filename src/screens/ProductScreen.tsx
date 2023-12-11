@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, Button, ActivityIndicator, Image } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { Picker } from '@react-native-picker/picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { ProductsStackParams } from '../navigation/ProductsNavigator';
 import { useCategories, useForm } from '../hooks';
 import { ProductsContext } from '../context';
@@ -20,6 +21,7 @@ export const ProductScreen = ({ route, navigation }: Props) => {
         nombre: name,
         img: '',
     });
+    const [tempUri, setTempUri] = useState<string>();
 
     useEffect(() => {
         navigation.setOptions({
@@ -51,6 +53,17 @@ export const ProductScreen = ({ route, navigation }: Props) => {
             const newProduct = await addProduct(tempCategoriaId, nombre);
             onChange(newProduct._id, '_id');
         }
+    };
+
+    const takePhoto = () => {
+        launchCamera({
+            mediaType: 'photo',
+            quality: 0.5,
+        }, (resp) => {
+            if (resp.didCancel === true) { return; }
+            if (!resp.assets) { return; }
+            setTempUri(resp.assets[0].uri);
+        });
     };
 
     return (
@@ -91,7 +104,7 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                     <View style={styles.buttonsContainer}>
                         <Button
                             title="Camera"
-                            onPress={() => { }}
+                            onPress={takePhoto}
                             color="#5856d6"
                         />
 
@@ -106,7 +119,7 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                 }
 
                 {
-                    (img.length > 0) &&
+                    (img.length > 0 && !tempUri) &&
                     <Image
                         source={{ uri: img }}
                         style={styles.image}
@@ -114,6 +127,13 @@ export const ProductScreen = ({ route, navigation }: Props) => {
                 }
 
                 {/* TODO Mostrar imagen temporal */}
+                {
+                    (tempUri) &&
+                    <Image
+                        source={{ uri: tempUri }}
+                        style={styles.image}
+                    />
+                }
             </ScrollView>
         </View>
     );
